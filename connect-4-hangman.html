@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fancy Connect 4 and Hangman</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #1e3c72, #2a5298);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, #ff416c, #ff4b2b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .game-container {
+      display: flex;
+      gap: 3rem;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-top: 50px;
+    }
+
+    .game-box {
+      padding: 1rem;
+      background: #003049;
+      border-radius: 10px;
+      box-shadow: 0 0 15px #000;
+      display: none;
+    }
+
+    .game-box h2 {
+      text-align: center;
+    }
+
+    .game-box button {
+      padding: 0.5rem 1rem;
+      background-color: #28a745;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    #select-game {
+      text-align: center;
+    }
+
+    #select-game button {
+      padding: 1rem 2rem;
+      margin: 1rem;
+      font-size: 1.5rem;
+      cursor: pointer;
+      background-color: #ff4b2b;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    #status {
+      margin: 1rem 0;
+      font-size: 1.2rem;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(7, 80px);
+      grid-template-rows: repeat(6, 80px);
+      gap: 5px;
+      background-color: #003049;
+      padding: 10px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px #000;
+      margin-bottom: 20px;
+    }
+
+    .cell {
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle at 30% 30%, #005f73, #003049);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .red {
+      background: radial-gradient(circle at 30% 30%, #ff6b6b, #c9184a);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+    }
+
+    .yellow {
+      background: radial-gradient(circle at 30% 30%, #f1c40f, #f39c12);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+    }
+
+    #hangman {
+      margin-top: 30px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    #hangman .word {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    #hangman .letters {
+      text-align: center;
+    }
+
+    #hangman .letters input {
+      width: 40px;
+      height: 40px;
+      margin: 0.5rem;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    #hangman .letters button {
+      padding: 1rem 2rem;
+      background-color: #ff4b2b;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #hangman .gallows {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    #hangman .gallows svg {
+      width: 150px;
+      height: 200px;
+    }
+
+    #hangman .water {
+      margin-top: 10px;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Fancy Connect 4 and Hangman</h1>
+  
+  <div id="select-game">
+    <button onclick="showConnect4()">Play Connect 4</button>
+    <button onclick="showHangman()">Play Hangman</button>
+  </div>
+
+  <!-- Connect 4 Game -->
+  <div id="connect4-game" class="game-box">
+    <h2>Connect 4 Game</h2>
+    <div id="game-board"></div>
+    <p id="status"></p>
+    <button onclick="resetGame()">Reset Game</button>
+  </div>
+
+  <!-- Hangman Game -->
+  <div id="hangman-game" class="game-box">
+    <h2>Hangman Game</h2>
+    <div id="hangman">
+      <div>
+        <h3>Player 1: Enter the word (it will be shown as dots)</h3>
+        <input id="hangman-input" type="password" placeholder="Type word here">
+        <button onclick="submitHangmanWord()">Submit Word</button>
+      </div>
+      <div>
+        <h3>Player 2: Guess the letters</h3>
+        <p id="hangman-word-display" class="word"></p>
+        <input id="guess-letter" type="text" maxlength="1">
+        <button onclick="guessLetter()">Guess Letter</button>
+        <p id="hangman-message"></p>
+      </div>
+      <div id="hangman-gallows" class="gallows">
+        <svg id="gallows-svg" viewBox="0 0 150 200">
+          <g>
+            <!-- Gallows structure -->
+            <line x1="30" y1="160" x2="30" y2="30" stroke="white" stroke-width="3"/>
+            <line x1="30" y1="30" x2="80" y2="30" stroke="white" stroke-width="3"/>
+            <line x1="80" y1="30" x2="80" y2="50" stroke="white" stroke-width="3"/>
+            <circle id="head" cx="80" cy="60" r="10" stroke="white" stroke-width="3" fill="transparent" />
+            <line id="body" x1="80" y1="70" x2="80" y2="100" stroke="white" stroke-width="3"/>
+            <line id="left-arm" x1="80" y1="80" x2="60" y2="90" stroke="white" stroke-width="3"/>
+            <line id="right-arm" x1="80" y1="80" x2="100" y2="90" stroke="white" stroke-width="3"/>
+            <line id="left-leg" x1="80" y1="100" x2="60" y2="120" stroke="white" stroke-width="3"/>
+            <line id="right-leg" x1="80" y1="100" x2="100" y2="120" stroke="white" stroke-width="3"/>
+          </g>
+        </svg>
+      </div>
+      <div id="water" class="water">
+        <p>Water level: <span id="water-level">0</span>%</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Connect 4 Variables and Functions
+    let currentPlayer = 'red';
+    const numRows = 6;
+    const numCols = 7;
+    const board = Array.from({ length: numRows }, () => Array(numCols).fill(null));
+    const gameBoardElement = document.getElementById('game-board');
+    const statusElement = document.getElementById('status');
+
+    function showConnect4() {
+      document.getElementById('select-game').style.display = 'none';
+      document.getElementById('connect4-game').style.display = 'block';
+      document.getElementById('hangman-game').style.display = 'none';
+      resetGame();
+    }
+
+    function resetGame() {
+      for (let r = 0; r < numRows; r++) {
+        for (let c = 0; c < numCols; c++) {
+          board[r][c] = null;
+        }
+      }
+      renderBoard();
+      currentPlayer = 'red';
+      statusElement.textContent = "Red's turn";
+    }
+
+    function renderBoard() {
+      gameBoardElement.innerHTML = '';
+      for (let r = 0; r < numRows; r++) {
+        for (let c = 0; c < numCols; c++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          if (board[r][c] === 'red') {
+            cell.classList.add('red');
+          } else if (board[r][c] === 'yellow') {
+            cell.classList.add('yellow');
+          }
+          cell.onclick = () => dropPiece(c);
+          gameBoardElement.appendChild(cell);
+        }
+      }
+    }
+
+    function dropPiece(col) {
+      for (let row = numRows - 1; row >= 0; row--) {
+        if (!board[row][col]) {
+          board[row][col] = currentPlayer;
+          checkWinner();
+          currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red';
+          statusElement.textContent = `${currentPlayer === 'red' ? 'Red' : 'Yellow'}'s turn`;
+          renderBoard();
+          return;
+        }
+      }
+    }
+
+    function checkWinner() {
+      for (let r = 0; r < numRows; r++) {
+        for (let c = 0; c < numCols; c++) {
+          if (board[r][c] && checkDirection(r, c)) {
+            statusElement.textContent = `${board[r][c]} wins!`;
+            return;
+          }
+        }
+      }
+    }
+
+    function checkDirection(row, col) {
+      const directions = [
+        [0, 1], // horizontal
+        [1, 0], // vertical
+        [1, 1], // diagonal /
+        [1, -1], // diagonal \
+      ];
+      for (const [dr, dc] of directions) {
+        let count = 0;
+        // Check in both directions for each of the 4 directions
+        for (let i = -3; i <= 3; i++) {
+          const r = row + dr * i;
+          const c = col + dc * i;
+          if (r >= 0 && r < numRows && c >= 0 && c < numCols && board[r][c] === board[row][col]) {
+            count++;
+          }
+          if (count === 4) return true;
+        }
+      }
+      return false;
+    }
+
+    // Hangman Variables and Functions
+    let hangmanWord = '';
+    let guessedLetters = [];
+    let attemptsLeft = 6;
+    const bodyParts = ['head', 'body', 'left-arm', 'right-arm', 'left-leg', 'right-leg'];
+    
+    function showHangman() {
+      document.getElementById('select-game').style.display = 'none';
+      document.getElementById('hangman-game').style.display = 'block';
+      document.getElementById('connect4-game').style.display = 'none';
+      document.getElementById('hangman-message').textContent = '';
+      resetHangman();
+    }
+
+    function resetHangman() {
+      guessedLetters = [];
+      attemptsLeft = 6;
+      document.getElementById('hangman-input').value = '';
+      document.getElementById('hangman-word-display').textContent = '';
+      document.getElementById('hangman-message').textContent = '';
+      document.getElementById('water-level').textContent = '0';
+      bodyParts.forEach(part => document.getElementById(part).style.display = 'none');
+      document.getElementById('water').style.display = 'none';
+    }
+
+    function submitHangmanWord() {
+      const word = document.getElementById('hangman-input').value.trim().toLowerCase();
+      if (word.length === 0) return;
+
+      hangmanWord = word;
+      const wordDisplay = hangmanWord.split('').map(letter => '_').join(' ');
+      document.getElementById('hangman-word-display').textContent = wordDisplay;
+      document.getElementById('hangman-input').disabled = true;
+    }
+
+    function guessLetter() {
+      const letter = document.getElementById('guess-letter').value.trim().toLowerCase();
+      if (letter.length === 0 || guessedLetters.includes(letter)) return;
+
+      guessedLetters.push(letter);
+      let wordDisplay = hangmanWord.split('').map(l => guessedLetters.includes(l) ? l : '_').join(' ');
+      document.getElementById('hangman-word-display').textContent = wordDisplay;
+
+      if (!hangmanWord.includes(letter)) {
+        attemptsLeft--;
+        document.getElementById(bodyParts[6 - attemptsLeft]).style.display = 'block';
+        document.getElementById('water-level').textContent = (100 * (6 - attemptsLeft) / 6).toFixed(0);
+        document.getElementById('water').style.display = 'block';
+      }
+
+      if (!wordDisplay.includes('_')) {
+        document.getElementById('hangman-message').textContent = 'You won!';
+      } else if (attemptsLeft === 0) {
+        document.getElementById('hangman-message').textContent = 'You lost!';
+      }
+
+      document.getElementById('guess-letter').value = '';
+    }
+  </script>
+</body>
+</html>
