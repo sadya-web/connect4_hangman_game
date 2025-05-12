@@ -102,9 +102,8 @@
 
   <div id="connect4-game" class="game-box">
     <h2>Connect 4</h2>
-    <div style="display: flex; flex-direction: column; align-items: center;">
-  <div id="column-labels" style="display: flex; gap: 5px; margin-bottom: 5px;">
-    <div style="width: 30px;"></div> <!-- spacer -->
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+  <div id="column-labels-top" style="display: flex; gap: 5px;">
     <div style="width: 80px; text-align: center;">1</div>
     <div style="width: 80px; text-align: center;">2</div>
     <div style="width: 80px; text-align: center;">3</div>
@@ -113,7 +112,19 @@
     <div style="width: 80px; text-align: center;">6</div>
     <div style="width: 80px; text-align: center;">7</div>
   </div>
- 
+
+  <div id="game-board"></div>
+
+  <div id="column-labels-bottom" style="display: flex; gap: 5px;">
+    <div style="width: 80px; text-align: center;">1</div>
+    <div style="width: 80px; text-align: center;">2</div>
+    <div style="width: 80px; text-align: center;">3</div>
+    <div style="width: 80px; text-align: center;">4</div>
+    <div style="width: 80px; text-align: center;">5</div>
+    <div style="width: 80px; text-align: center;">6</div>
+    <div style="width: 80px; text-align: center;">7</div>
+  </div>
+</div>
     <div id="game-board"></div>
     <p id="status"></p>
   </div>
