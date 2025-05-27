@@ -296,7 +296,7 @@
       wordleWord = document.getElementById('wordle-input').value.toLowerCase();
       document.getElementById('wordle-input').value = '';
       document.getElementById('wordle-message').textContent = 'Word set! Start guessing.';
-      document.getElementById('wordle-attempts-left').textContent = 'Attempts Left: 6';
+      document.getElementById('wordle-attempts-left').textContent = 'Attempts Left: 10';
       document.getElementById('wordle-hint').innerHTML = '';
       wordleAttempts = 0;
     }
@@ -308,13 +308,13 @@
         return;
       }
 
-      if (wordleAttempts >= 6) {
+      if (wordleAttempts >= 10) {
         document.getElementById('wordle-message').textContent = 'You have used all attempts!';
         return;
       }
 
       wordleAttempts++;
-      document.getElementById('wordle-attempts-left').textContent = `Attempts Left: ${6 - wordleAttempts}`;
+      document.getElementById('wordle-attempts-left').textContent = `Attempts Left: ${10 - wordleAttempts}`;
 
       const result = document.createElement('div');
       const used = Array(wordleWord.length).fill(false);
