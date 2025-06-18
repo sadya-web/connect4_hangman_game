@@ -5,8 +5,8 @@
   <title>Fancy Connect 4, Hangman, and Wordle</title>
   <style>
     body {
- background: url('https://i.ibb.co/xS3GnBTs/Chat-GPT-Image-May-27-2025-06-25-54-PM.png') no-repeat center center fixed;
-background-size: cover;
+      background: url('https://i.ibb.co/xS3GnBTs/Chat-GPT-Image-May-27-2025-06-25-54-PM.png') no-repeat center center fixed;
+      background-size: cover;
     }
     h1 {
       font-size: 3rem;
@@ -63,17 +63,16 @@ background-size: cover;
       cursor: pointer;
     }
     .column-labels {
-  display: flex;
-  gap: 5px;
-  margin-bottom: 5px;
-}
-
-.column-labels div {
-  width: 80px;
-  text-align: center;
-  font-weight: bold;
-  font-size: 1.2rem;
-}
+      display: flex;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+    .column-labels div {
+      width: 80px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
     .red {
       background: radial-gradient(circle at 30% 30%, #ff6b6b, #c9184a);
       width: 60px;
@@ -107,32 +106,31 @@ background-size: cover;
 
   <div id="connect4-game" class="game-box">
     <h2>Connect 4</h2>
-  <div id="connect4-game" class="game-box">
-  <h2>Connect 4 Game</h2>
-  <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-    
-    <!-- Top Column Labels -->
-    <div class="column-labels">
-      <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+      <div class="column-labels">
+        <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
+      </div>
+      <div id="game-board"></div>
+      <div class="column-labels">
+        <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
+      </div>
     </div>
-    
-    <!-- Game Board -->
-    <div id="game-board"></div>
-
-    <!-- Bottom Column Labels -->
-    <div class="column-labels">
-      <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
-    </div>
-  </div>
-
-  <p id="status"></p>
-</div>
-    <div id="game-board"></div>
     <p id="status"></p>
   </div>
 
   <div id="hangman-game" class="game-box">
     <h2>Hangman</h2>
+    <div id="gallows" style="text-align:center; font-family: monospace; line-height: 1.2;">
+      <pre id="hangman-figure">
+    +---+
+    |   |
+        |
+        |
+        |
+        |
+  =========
+      </pre>
+    </div>
     <input id="hangman-input" type="password" placeholder="Enter secret word" />
     <button onclick="submitHangmanWord()">Submit Word</button>
     <p id="hangman-word-display"></p>
@@ -251,21 +249,22 @@ background-size: cover;
       hangmanWord = document.getElementById('hangman-input').value.toLowerCase();
       guessedLetters = [];
       attemptsLeft = 6;
-      updateHangmanWordDisplay();
       document.getElementById('hangman-message').textContent = '';
+      updateHangmanWordDisplay();
+      updateHangmanFigure();
     }
 
     function guessLetter() {
       const guess = document.getElementById('guess-letter').value.toLowerCase();
       document.getElementById('guess-letter').value = '';
-      if (!guess || guessedLetters.includes(guess)) return;
+      if (!guess || guessedLetters.includes(guess) || attemptsLeft === 0) return;
 
       guessedLetters.push(guess);
       if (!hangmanWord.includes(guess)) {
         attemptsLeft--;
+        updateHangmanFigure();
         if (attemptsLeft === 0) {
-          document.getElementById('hangman-message').textContent = `Game Over! The word was: ${hangmanWord}`;
-          return;
+          document.getElementById('hangman-message').textContent = `You lost! The word was: ${hangmanWord}`;
         }
       }
       updateHangmanWordDisplay();
@@ -280,6 +279,19 @@ background-size: cover;
       if (!display.includes('_')) {
         document.getElementById('hangman-message').textContent = `You win! The word was: ${hangmanWord}`;
       }
+    }
+
+    function updateHangmanFigure() {
+      const stages = [
+        `\n    +---+\n    |   |\n        |\n        |\n        |\n        |\n  =========`,
+        `\n    +---+\n    |   |\n    O   |\n        |\n        |\n        |\n  =========`,
+        `\n    +---+\n    |   |\n    O   |\n    |   |\n        |\n        |\n  =========`,
+        `\n    +---+\n    |   |\n    O   |\n   /|   |\n        |\n        |\n  =========`,
+        `\n    +---+\n    |   |\n    O   |\n   /|\\  |\n        |\n        |\n  =========`,
+        `\n    +---+\n    |   |\n    O   |\n   /|\\  |\n   /    |\n        |\n  =========`,
+        `\n    +---+\n    |   |\n    O   |\n   /|\\  |\n   / \\  |\n        |\n  =========`
+      ];
+      document.getElementById('hangman-figure').textContent = stages[6 - attemptsLeft];
     }
 
     // Wordle
