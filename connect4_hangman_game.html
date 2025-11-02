@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Fancy Connect 4, Hangman & Wordle</title>
+  <title>Fancy Connect 4 and Hangman</title>
   <style>
     body {
       margin: 0;
@@ -30,20 +31,11 @@
       border-radius: 10px;
       box-shadow: 0 0 15px #000;
       display: none;
+      margin-top: 20px;
     }
 
     .game-box h2 {
       text-align: center;
-    }
-
-    .game-box button {
-      padding: 0.5rem 1rem;
-      background-color: #28a745;
-      border: none;
-      border-radius: 5px;
-      color: white;
-      font-size: 1rem;
-      cursor: pointer;
     }
 
     #select-game {
@@ -62,8 +54,16 @@
       box-shadow: 0 0 10px #000;
     }
 
-    #status {
-      margin: 1rem 0;
+    /* Connect 4 Numbers */
+    #connect4Numbers {
+      display: flex;
+      width: 560px; /* 7 columns × 80px each */
+      margin-bottom: 10px;
+    }
+
+    #connect4Numbers span {
+      width: 80px;
+      text-align: center;
       font-size: 1.2rem;
     }
 
@@ -71,8 +71,15 @@
       border-radius: 15px;
       background-color: #003049;
       margin-bottom: 20px;
+      cursor: pointer;
     }
 
+    #status {
+      margin: 1rem 0;
+      font-size: 1.2rem;
+    }
+
+    /* Hangman styling */
     #hangman {
       margin-top: 30px;
       width: 100%;
@@ -109,7 +116,7 @@
   </style>
 </head>
 <body>
-  <h1>Fancy Connect 4, Hangman & Wordle</h1>
+  <h1>Fancy Connect 4 and Hangman</h1>
   
   <div id="select-game">
     <button onclick="showConnect4()">Play Connect 4</button>
@@ -120,7 +127,10 @@
   <!-- Connect 4 Game -->
   <div id="connect4-game" class="game-box">
     <h2>Connect 4 Game</h2>
-    <canvas id="connect4Canvas" width="600" height="480"></canvas>
+    <div id="connect4Numbers">
+      <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+    </div>
+    <canvas id="connect4Canvas" width="560" height="480"></canvas>
     <p id="status"></p>
   </div>
 
@@ -169,32 +179,14 @@
     // Connect 4 Logic
     function drawBoard() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw cells
       for (let row = 0; row < 6; row++) {
         for (let col = 0; col < 7; col++) {
           ctx.beginPath();
           ctx.arc(col * 80 + 40, row * 80 + 40, 30, 0, 2 * Math.PI);
           ctx.fillStyle = board[row][col] || '#003049';
           ctx.fill();
-          ctx.strokeStyle = 'white';
           ctx.stroke();
         }
-      }
-
-      // Column numbers
-      ctx.fillStyle = 'white';
-      ctx.font = '20px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      for (let col = 0; col < 7; col++) {
-        ctx.fillText(col + 1, col * 80 + 40, 10);
-      }
-
-      // Row numbers on right side
-      ctx.textAlign = 'left';
-      for (let row = 0; row < 6; row++) {
-        ctx.fillText(row + 1, 7 * 80 + 5, row * 80 + 40);
       }
     }
 
@@ -204,38 +196,40 @@
           board[row][col] = currentPlayer;
           drawBoard();
           if (checkWinner(row, col)) {
-            document.getElementById('status').textContent = `${currentPlayer.toUpperCase()} wins!`;
+            document.getElementById('status').textContent = currentPlayer.toUpperCase() + " WINS!";
             canvas.removeEventListener('click', handleClick);
-          } else {
-            currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red';
+            return;
           }
+          currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red';
           break;
         }
       }
     }
 
     function checkWinner(row, col) {
-      const directions = [
-        { dr: 0, dc: 1 }, // horizontal
-        { dr: 1, dc: 0 }, // vertical
-        { dr: 1, dc: 1 }, // diagonal down-right
-        { dr: 1, dc: -1 } // diagonal down-left
-      ];
       const color = board[row][col];
 
-      for (let {dr, dc} of directions) {
+      // Directions: horizontal, vertical, diag1, diag2
+      const directions = [
+        { x: 1, y: 0 },
+        { x: 0, y: 1 },
+        { x: 1, y: 1 },
+        { x: 1, y: -1 }
+      ];
+
+      for (const {x, y} of directions) {
         let count = 1;
-        for (let step = 1; step < 4; step++) {
-          const r = row + dr*step, c = col + dc*step;
-          if (r >=0 && r < 6 && c >=0 && c < 7 && board[r][c] === color) count++;
-          else break;
+        // forward
+        let r = row + y, c = col + x;
+        while (r >= 0 && r < 6 && c >= 0 && c < 7 && board[r][c] === color) {
+          count++; r += y; c += x;
         }
-        for (let step = 1; step < 4; step++) {
-          const r = row - dr*step, c = col - dc*step;
-          if (r >=0 && r < 6 && c >=0 && c < 7 && board[r][c] === color) count++;
-          else break;
+        // backward
+        r = row - y; c = col - x;
+        while (r >= 0 && r < 6 && c >= 0 && c < 7 && board[r][c] === color) {
+          count++; r -= y; c -= x;
         }
-        if (count >=4) return true;
+        if (count >= 4) return true;
       }
       return false;
     }
@@ -246,7 +240,6 @@
     }
 
     canvas.addEventListener('click', handleClick);
-    drawBoard();
 
     // Hangman Logic
     function submitHangmanWord() {
@@ -259,12 +252,10 @@
       const guess = document.getElementById('guess-letter').value.toLowerCase();
       document.getElementById('guess-letter').value = '';
       
-      if (guessedLetters.includes(guess)) return;
-
-      if (hangmanWord.includes(guess)) {
+      if (hangmanWord.includes(guess) && !guessedLetters.includes(guess)) {
         guessedLetters.push(guess);
         updateHangmanWordDisplay();
-      } else {
+      } else if (!guessedLetters.includes(guess)) {
         attemptsLeft--;
         document.getElementById('hangman-message').textContent = `Incorrect! You have ${attemptsLeft} attempts left.`;
         if (attemptsLeft === 0) {
@@ -286,28 +277,28 @@
     }
 
     // Wordle Logic
-    const wordleTarget = "apple";  
+    const wordleTarget = "apple";  // Target word
     let wordleGuesses = [];
 
     function submitWordleGuess() {
       const guess = document.getElementById('wordle-input').value.toLowerCase();
-      if (guess.length !== 5) return;
-
-      wordleGuesses.push(guess);
-      displayWordleGuesses();
-      checkWordleGuess(guess);
-
-      if (wordleGuesses.length >= 6 && guess !== wordleTarget) {
-        document.getElementById('wordle-message').textContent += " Game Over!";
+      if (guess.length === 5) {
+        wordleGuesses.push(guess);
+        displayWordleGuesses();
+        checkWordleGuess(guess);
       }
     }
 
     function checkWordleGuess(guess) {
       let result = '';
       for (let i = 0; i < 5; i++) {
-        if (guess[i] === wordleTarget[i]) result += '🟩';
-        else if (wordleTarget.includes(guess[i])) result += '🟨';
-        else result += '⬛';
+        if (guess[i] === wordleTarget[i]) {
+          result += '🟩';
+        } else if (wordleTarget.includes(guess[i])) {
+          result += '🟨';
+        } else {
+          result += '⬛';
+        }
       }
       document.getElementById('wordle-message').textContent = result;
     }
