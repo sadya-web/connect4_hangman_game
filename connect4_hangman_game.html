@@ -1,13 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Fancy Connect 4, Hangman, and Wordle</title>
+  <meta charset="UTF-8">
+  <title>Fancy Connect 4 and Hangman</title>
   <style>
     body {
-      background: url('https://i.ibb.co/xS3GnBTs/Chat-GPT-Image-May-27-2025-06-25-54-PM.png') no-repeat center center fixed;
-      background-size: cover;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #1e3c72, #2a5298);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
     }
+
     h1 {
       font-size: 3rem;
       margin-bottom: 1rem;
@@ -15,6 +23,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
+
     .game-container {
       display: flex;
       gap: 3rem;
@@ -23,6 +32,7 @@
       align-items: center;
       margin-top: 50px;
     }
+
     .game-box {
       padding: 1rem;
       background: #003049;
@@ -30,6 +40,25 @@
       box-shadow: 0 0 15px #000;
       display: none;
     }
+
+    .game-box h2 {
+      text-align: center;
+    }
+
+    .game-box button {
+      padding: 0.5rem 1rem;
+      background-color: #28a745;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    #select-game {
+      text-align: center;
+    }
+
     #select-game button {
       padding: 1rem 2rem;
       margin: 1rem;
@@ -41,318 +70,201 @@
       border-radius: 10px;
       box-shadow: 0 0 10px #000;
     }
-    #game-board {
-      display: grid;
-      grid-template-columns: repeat(7, 80px);
-      grid-template-rows: repeat(6, 80px);
-      gap: 5px;
-      background-color: #003049;
-      padding: 10px;
-      border-radius: 15px;
-      box-shadow: 0 0 20px #000;
-      margin-bottom: 20px;
-    }
-    .cell {
-      width: 80px;
-      height: 80px;
-      background: radial-gradient(circle at 30% 30%, #005f73, #003049);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    .column-labels {
-      display: flex;
-      gap: 5px;
-      margin-bottom: 5px;
-    }
-    .column-labels div {
-      width: 80px;
-      text-align: center;
-      font-weight: bold;
+
+    #status {
+      margin: 1rem 0;
       font-size: 1.2rem;
     }
-    .red {
-      background: radial-gradient(circle at 30% 30%, #ff6b6b, #c9184a);
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
+
+    canvas {
+      border-radius: 15px;
+      background-color: #003049;
+      margin-bottom: 20px;
     }
-    .yellow {
-      background: radial-gradient(circle at 30% 30%, #f1c40f, #f39c12);
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
+
+    #connect4Canvas {
+      margin-top: 20px;
     }
-    .wordle-guess-result span {
-      padding: 0.5rem;
-      margin: 0.2rem;
-      display: inline-block;
-      font-size: 1.5rem;
-      font-weight: bold;
-      border-radius: 5px;
-      color: white;
+
+    #column-labels {
+      display: flex;
+      justify-content: space-between;
+      width: 560px;
+      font-size: 1.2rem;
+      margin-bottom: -10px;
+    }
+
+    #row-labels {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 480px;
+      position: absolute;
+      left: calc(50% + 300px);
+      transform: translateX(10px);
+      font-size: 1.2rem;
     }
   </style>
 </head>
 <body>
-  <h1>Fancy Connect 4, Hangman, and Wordle</h1>
+  <h1>Fancy Connect 4 and Hangman</h1>
+  
   <div id="select-game">
     <button onclick="showConnect4()">Play Connect 4</button>
     <button onclick="showHangman()">Play Hangman</button>
     <button onclick="showWordle()">Play Wordle</button>
   </div>
 
+  <!-- Connect 4 Game -->
   <div id="connect4-game" class="game-box">
-    <h2>Connect 4</h2>
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-      <div class="column-labels">
-        <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
-      </div>
-      <div id="game-board"></div>
-      <div class="column-labels">
-        <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
-      </div>
+    <h2>Connect 4 Game</h2>
+    <div id="column-labels"></div>
+    <div style="position: relative; display: inline-block;">
+      <canvas id="connect4Canvas" width="560" height="480"></canvas>
+      <div id="row-labels"></div>
     </div>
     <p id="status"></p>
   </div>
 
+  <!-- Hangman Game -->
   <div id="hangman-game" class="game-box">
-    <h2>Hangman</h2>
-    <div id="gallows" style="text-align:center; font-family: monospace; line-height: 1.2;">
-      <pre id="hangman-figure">
-    +---+
-    |   |
-        |
-        |
-        |
-        |
-  =========
-      </pre>
+    <h2>Hangman Game</h2>
+    <div id="hangman">
+      <div>
+        <h3>Player 1: Enter the word (it will be shown as dots)</h3>
+        <input id="hangman-input" type="password" placeholder="Type word here">
+        <button onclick="submitHangmanWord()">Submit Word</button>
+      </div>
+      <div>
+        <h3>Player 2: Guess the letters</h3>
+        <p id="hangman-word-display" class="word"></p>
+        <input id="guess-letter" type="text" maxlength="1">
+        <button onclick="guessLetter()">Guess Letter</button>
+        <p id="hangman-message"></p>
+      </div>
     </div>
-    <input id="hangman-input" type="password" placeholder="Enter secret word" />
-    <button onclick="submitHangmanWord()">Submit Word</button>
-    <p id="hangman-word-display"></p>
-    <input id="guess-letter" maxlength="1" />
-    <button onclick="guessLetter()">Guess</button>
-    <p id="hangman-message"></p>
   </div>
 
+  <!-- Wordle Game -->
   <div id="wordle-game" class="game-box">
-    <h2>Wordle</h2>
-    <input id="wordle-input" type="password" placeholder="Enter secret word" />
-    <button onclick="submitWordleWord()">Submit Word</button>
-    <br /><br />
-    <input id="wordle-guess" type="text" placeholder="Guess the word" />
-    <button onclick="guessWordle()">Guess</button>
-    <p id="wordle-message"></p>
-    <p id="wordle-attempts-left"></p>
-    <div id="wordle-hint" class="wordle-guess-result"></div>
+    <h2>Wordle Game</h2>
+    <div id="wordle">
+      <div>
+        <h3>Guess the Word:</h3>
+        <input id="wordle-input" type="text" maxlength="5" placeholder="Enter 5 letter word">
+        <button onclick="submitWordleGuess()">Submit Guess</button>
+      </div>
+      <p id="wordle-message"></p>
+      <div id="wordle-guesses"></div>
+    </div>
   </div>
 
   <script>
-    // UI Control
-    function showConnect4() {
-      hideAllGames();
-      document.getElementById('connect4-game').style.display = 'block';
-    }
-    function showHangman() {
-      hideAllGames();
-      document.getElementById('hangman-game').style.display = 'block';
-    }
-    function showWordle() {
-      hideAllGames();
-      document.getElementById('wordle-game').style.display = 'block';
-    }
-    function hideAllGames() {
-      document.getElementById('connect4-game').style.display = 'none';
-      document.getElementById('hangman-game').style.display = 'none';
-      document.getElementById('wordle-game').style.display = 'none';
-      document.getElementById('select-game').style.display = 'none';
-    }
+    let currentPlayer = 'red';
+    const board = Array.from({ length: 6 }, () => Array(7).fill(null));
+    const canvas = document.getElementById('connect4Canvas');
+    const ctx = canvas.getContext('2d');
 
-    // Connect 4
-    const rows = 6, cols = 7;
-    const board = [];
-    let currentPlayer = 'red', gameOver = false;
+    // Add column and row labels
+    const columnLabelsDiv = document.getElementById('column-labels');
+    const rowLabelsDiv = document.getElementById('row-labels');
 
-    const boardDiv = document.getElementById('game-board');
-    for (let r = 0; r < rows; r++) {
-      board[r] = [];
-      for (let c = 0; c < cols; c++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.dataset.row = r;
-        cell.dataset.col = c;
-        cell.addEventListener('click', handleMove);
-        boardDiv.appendChild(cell);
-        board[r][c] = '';
+    function createLabels() {
+      columnLabelsDiv.innerHTML = '';
+      for (let i = 1; i <= 7; i++) {
+        const span = document.createElement('span');
+        span.textContent = i;
+        columnLabelsDiv.appendChild(span);
+      }
+      rowLabelsDiv.innerHTML = '';
+      for (let i = 1; i <= 6; i++) {
+        const span = document.createElement('span');
+        span.textContent = i;
+        rowLabelsDiv.appendChild(span);
       }
     }
 
-    function handleMove(e) {
-      if (gameOver) return;
-      const col = parseInt(e.target.dataset.col);
-      for (let r = rows - 1; r >= 0; r--) {
-        if (!board[r][col]) {
-          board[r][col] = currentPlayer;
-          updateBoard();
-          if (checkWin(r, col)) {
-            document.getElementById('status').textContent = `${currentPlayer.toUpperCase()} Wins!`;
-            gameOver = true;
-          } else {
-            currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red';
-          }
-          return;
+    createLabels();
+
+    function drawBoard() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let row = 0; row < 6; row++) {
+        for (let col = 0; col < 7; col++) {
+          ctx.beginPath();
+          ctx.arc(col * 80 + 40, row * 80 + 40, 30, 0, 2 * Math.PI);
+          ctx.fillStyle = board[row][col] || '#ffffff';
+          ctx.fill();
+          ctx.stroke();
         }
       }
     }
 
-    function updateBoard() {
-      const cells = document.querySelectorAll('.cell');
-      cells.forEach(cell => {
-        const r = parseInt(cell.dataset.row);
-        const c = parseInt(cell.dataset.col);
-        cell.innerHTML = board[r][c] ? `<div class="${board[r][c]}"></div>` : '';
-      });
+    function dropDisc(col) {
+      for (let row = 5; row >= 0; row--) {
+        if (!board[row][col]) {
+          board[row][col] = currentPlayer;
+          drawBoard();
+          if (checkWinner(row, col)) {
+            document.getElementById('status').textContent = `${currentPlayer.toUpperCase()} wins!`;
+            canvas.removeEventListener('click', handleClick);
+            return;
+          }
+          currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red';
+          document.getElementById('status').textContent = `${currentPlayer.toUpperCase()}'s turn`;
+          break;
+        }
+      }
     }
 
-    function checkWin(row, col) {
-      const directions = [[0,1],[1,0],[1,1],[1,-1]];
-      for (let [dr, dc] of directions) {
+    function handleClick(event) {
+      const col = Math.floor(event.offsetX / 80);
+      dropDisc(col);
+    }
+
+    canvas.addEventListener('click', handleClick);
+
+    function checkWinner(row, col) {
+      const directions = [
+        [ [0,1], [0,-1] ], // horizontal
+        [ [1,0], [-1,0] ], // vertical
+        [ [1,1], [-1,-1] ], // diagonal ↘↖
+        [ [1,-1], [-1,1] ]  // diagonal ↙↗
+      ];
+      for (let dir of directions) {
         let count = 1;
-        count += countDirection(row, col, dr, dc);
-        count += countDirection(row, col, -dr, -dc);
+        for (let [dx, dy] of dir) {
+          let r = row + dx, c = col + dy;
+          while (r>=0 && r<6 && c>=0 && c<7 && board[r][c] === currentPlayer) {
+            count++;
+            r += dx; c += dy;
+          }
+        }
         if (count >= 4) return true;
       }
       return false;
     }
 
-    function countDirection(r, c, dr, dc) {
-      let count = 0;
-      let color = board[r][c];
-      r += dr;
-      c += dc;
-      while (r >= 0 && r < rows && c >= 0 && c < cols && board[r][c] === color) {
-        count++;
-        r += dr;
-        c += dc;
-      }
-      return count;
+    function showConnect4() {
+      document.getElementById('select-game').style.display = 'none';
+      document.getElementById('connect4-game').style.display = 'block';
+      document.getElementById('hangman-game').style.display = 'none';
+      document.getElementById('wordle-game').style.display = 'none';
+      drawBoard();
+      createLabels();
     }
 
-    // Hangman
-    let hangmanWord = '', guessedLetters = [], attemptsLeft = 6;
-
-    function submitHangmanWord() {
-      hangmanWord = document.getElementById('hangman-input').value.toLowerCase();
-      guessedLetters = [];
-      attemptsLeft = 6;
-      document.getElementById('hangman-message').textContent = '';
-      updateHangmanWordDisplay();
-      updateHangmanFigure();
+    function showHangman() {
+      document.getElementById('select-game').style.display = 'none';
+      document.getElementById('hangman-game').style.display = 'block';
+      document.getElementById('connect4-game').style.display = 'none';
+      document.getElementById('wordle-game').style.display = 'none';
     }
 
-    function guessLetter() {
-      const guess = document.getElementById('guess-letter').value.toLowerCase();
-      document.getElementById('guess-letter').value = '';
-      if (!guess || guessedLetters.includes(guess) || attemptsLeft === 0) return;
-
-      guessedLetters.push(guess);
-      if (!hangmanWord.includes(guess)) {
-        attemptsLeft--;
-        updateHangmanFigure();
-        if (attemptsLeft === 0) {
-          document.getElementById('hangman-message').textContent = `You lost! The word was: ${hangmanWord}`;
-        }
-      }
-      updateHangmanWordDisplay();
-    }
-
-    function updateHangmanWordDisplay() {
-      let display = '';
-      for (let ch of hangmanWord) {
-        display += guessedLetters.includes(ch) ? ch + ' ' : '_ ';
-      }
-      document.getElementById('hangman-word-display').textContent = display.trim();
-      if (!display.includes('_')) {
-        document.getElementById('hangman-message').textContent = `You win! The word was: ${hangmanWord}`;
-      }
-    }
-
-    function updateHangmanFigure() {
-      const stages = [
-        `\n    +---+\n    |   |\n        |\n        |\n        |\n        |\n  =========`,
-        `\n    +---+\n    |   |\n    O   |\n        |\n        |\n        |\n  =========`,
-        `\n    +---+\n    |   |\n    O   |\n    |   |\n        |\n        |\n  =========`,
-        `\n    +---+\n    |   |\n    O   |\n   /|   |\n        |\n        |\n  =========`,
-        `\n    +---+\n    |   |\n    O   |\n   /|\\  |\n        |\n        |\n  =========`,
-        `\n    +---+\n    |   |\n    O   |\n   /|\\  |\n   /    |\n        |\n  =========`,
-        `\n    +---+\n    |   |\n    O   |\n   /|\\  |\n   / \\  |\n        |\n  =========`
-      ];
-      document.getElementById('hangman-figure').textContent = stages[6 - attemptsLeft];
-    }
-
-    // Wordle
-    let wordleWord = '', wordleAttempts = 0;
-
-    function submitWordleWord() {
-      wordleWord = document.getElementById('wordle-input').value.toLowerCase();
-      document.getElementById('wordle-input').value = '';
-      document.getElementById('wordle-message').textContent = 'Word set! Start guessing.';
-      document.getElementById('wordle-attempts-left').textContent = 'Attempts Left: 10';
-      document.getElementById('wordle-hint').innerHTML = '';
-      wordleAttempts = 0;
-    }
-
-    function guessWordle() {
-      const guess = document.getElementById('wordle-guess').value.toLowerCase();
-      if (!wordleWord || guess.length !== wordleWord.length) {
-        document.getElementById('wordle-message').textContent = 'Enter a valid guess.';
-        return;
-      }
-
-      if (wordleAttempts >= 10) {
-        document.getElementById('wordle-message').textContent = 'You have used all attempts!';
-        return;
-      }
-
-      wordleAttempts++;
-      document.getElementById('wordle-attempts-left').textContent = `Attempts Left: ${10 - wordleAttempts}`;
-
-      const result = document.createElement('div');
-      const used = Array(wordleWord.length).fill(false);
-
-      for (let i = 0; i < guess.length; i++) {
-        const span = document.createElement('span');
-        span.textContent = guess[i].toUpperCase();
-
-        if (guess[i] === wordleWord[i]) {
-          span.style.backgroundColor = 'green';
-          used[i] = true;
-        } else if (wordleWord.includes(guess[i])) {
-          let misplaced = false;
-          for (let j = 0; j < wordleWord.length; j++) {
-            if (!used[j] && wordleWord[j] === guess[i]) {
-              misplaced = true;
-              used[j] = true;
-              break;
-            }
-          }
-          span.style.backgroundColor = misplaced ? 'orange' : 'black';
-        } else {
-          span.style.backgroundColor = 'black';
-        }
-        result.appendChild(span);
-      }
-
-      document.getElementById('wordle-hint').appendChild(result);
-      if (guess === wordleWord) {
-        document.getElementById('wordle-message').textContent = 'You got it!';
-      } else {
-        document.getElementById('wordle-message').textContent = '';
-      }
+    function showWordle() {
+      document.getElementById('select-game').style.display = 'none';
+      document.getElementById('wordle-game').style.display = 'block';
+      document.getElementById('hangman-game').style.display = 'none';
+      document.getElementById('connect4-game').style.display = 'none';
     }
   </script>
 </body>
